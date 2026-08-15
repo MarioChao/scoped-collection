@@ -1,0 +1,14 @@
+[package]
+name = "mariochao/scoped-collection"
+description = "CollectionService wrapper for managing tagged instances under certain ancestor roots."
+
+version = "1.0.0"
+license = "MIT"
+authors = ["Mario Chao"]
+realm = "shared"
+registry = "https://github.com/UpliftGames/wally-index"
+repository = "https://github.com/MarioChao/scoped-collection"
+
+exclude = ["TestPlace"]
+
+[dependencies]

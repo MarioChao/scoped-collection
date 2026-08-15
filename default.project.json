@@ -1,0 +1,22 @@
+{
+  "name": "scoped-collection",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "Modules": {
+        "$className": "Folder",
+        "$ignoreUnknownInstances": true,
+
+        "ScopedCollection": {
+          "$path": "src/ScopedCollection"
+        }
+      },
+
+      "Scripts": {
+        "$path": "src/TestPlace/ReplicatedStorage/Scripts",
+        "$ignoreUnknownInstances": true
+      }
+    }
+  }
+}
