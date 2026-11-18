@@ -43,7 +43,7 @@ onLoaded = function(instance: Instance)
                 end
             end
         end)
-        print("New connection created.")
+        print("New touched connection created.")
     end
 end
 
@@ -52,7 +52,7 @@ onUnloaded = function(instance: Instance)
     if instance:IsA("BasePart") then
         if Globals.part_touchedConnection[instance] then
             (Globals.part_touchedConnection[instance] :: RBXScriptConnection):Disconnect()
-            print("Connection disconnected.")
+            print("Touched connection disconnected.")
         end
         Globals.part_touchedConnection[instance] = nil
     end

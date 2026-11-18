@@ -31,7 +31,9 @@ type CFieldData = {
     _instanceRemovedConnection: RBXScriptConnection?,
 }
 
-export type CObjectType = typeof(setmetatable({} :: CFieldData, Class))
+type CObjectType = typeof(setmetatable({} :: CFieldData, Class))
+
+export type ScopedCollection = CObjectType
 
 
 ----- Class fields -----
@@ -99,7 +101,7 @@ function Class._onObjectLoaded(self: CObjectType, object: Instance)
     self._object_isLoaded[object] = true
     if self._objectLoadedFn then
         self._objectLoadedFn(object)
-    end 
+    end
 end
 
 function Class._onObjectUnloaded(self: CObjectType, object: Instance)
@@ -123,53 +125,53 @@ function Class._getIsUnderValidAncestor(self: CObjectType, object: Instance)
     return isValidAncestor
 end
 
+function Class._onAncestryChanged(self: CObjectType, object: Instance)
+    -- Check different loaded state
+    local isAlreadyLoaded = self._object_isLoaded[object] == true
+    local isValidAncestor = self:_getIsUnderValidAncestor(object)
+    if isValidAncestor == isAlreadyLoaded then
+        return
+    end
+
+    -- Load or unload
+    if isValidAncestor then
+        self:_onObjectLoaded(object)
+    else
+        self:_onObjectUnloaded(object)
+    end
+end
+
 function Class._onObjectTagged(self: CObjectType, object: Instance)
     -- Validate running
     if not self._isRunning then
         return
     end
 
-    -- Initial load
-    local isLoaded = false
-    task.defer(function()
-        if self:_getIsUnderValidAncestor(object) then
-            isLoaded = true
-            self:_onObjectLoaded(object)
-        end
-    end)
-
-    -- Ancestry changed
+    -- Connect to ancestry changed
     if self._tagged_ancestryChangedConnection[object] then
         (self._tagged_ancestryChangedConnection[object] :: RBXScriptConnection):Disconnect()
     end
-    self._tagged_ancestryChangedConnection[object] = (
-        object.AncestryChanged:Connect(function()
-            -- Check different loaded state
-            local isValidAncestor = self:_getIsUnderValidAncestor(object)
-            if isValidAncestor == isLoaded then
-                return
-            end
+    self._tagged_ancestryChangedConnection[object] = object.AncestryChanged:Connect(function()
+        self:_onAncestryChanged(object)
+    end)
 
-            -- Load or unload
-            isLoaded = isValidAncestor
-            if isLoaded then
-                self:_onObjectLoaded(object)
-            else
-                self:_onObjectUnloaded(object)
-            end
-        end)
-    )
+    -- Initial load
+    if self:_getIsUnderValidAncestor(object) then
+        self:_onObjectLoaded(object)
+    end
 end
 
 function Class._onObjectUntagged(self: CObjectType, object: Instance)
     -- Disconnect ancestry changed
     if self._tagged_ancestryChangedConnection[object] then
         (self._tagged_ancestryChangedConnection[object] :: RBXScriptConnection):Disconnect()
+        self._tagged_ancestryChangedConnection[object] = nil
     end
-    self._tagged_ancestryChangedConnection[object] = nil
 
-    -- Unload
-    self:_onObjectUnloaded(object)
+    -- Unload if loaded
+    if self._object_isLoaded[object] then
+        self:_onObjectUnloaded(object)
+    end
 end
 
 
@@ -193,19 +195,19 @@ function Class.start(self: CObjectType)
         self._instanceRemovedConnection:Disconnect()
     end
 
-    -- Connect events
+    -- Connect to tag added & removed
     local initialTagged = CollectionService:GetTagged(self._tagName)
-    task.defer(function()
-        for _, object in initialTagged do
-            task.defer(self._onObjectTagged, self, object)
-        end
-    end)
     self._instanceAddedConnection = CollectionService:GetInstanceAddedSignal(self._tagName):Connect(function(object: Instance)
         self:_onObjectTagged(object)
     end)
     self._instanceRemovedConnection = CollectionService:GetInstanceRemovedSignal(self._tagName):Connect(function(object: Instance)
         self:_onObjectUntagged(object)
     end)
+
+    -- Initial tagged
+    for _, object in initialTagged do
+        task.defer(self._onObjectTagged, self, object)
+    end
 end
 
 
@@ -229,16 +231,9 @@ function Class.terminate(self: CObjectType)
         self._instanceRemovedConnection:Disconnect()
     end
 
-    -- Remove all objects
+    -- Remove & clean up all objects
     for tagged, _ in self._tagged_ancestryChangedConnection do
         self:_onObjectUntagged(tagged)
-    end
-
-    -- Disconnect leftover ancestry changed connections
-    for _, connection in self._tagged_ancestryChangedConnection do
-        if connection then
-            connection:Disconnect()
-        end
     end
 
     -- Clear running data

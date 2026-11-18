@@ -2,7 +2,7 @@
 name = "mariochao/scoped-collection"
 description = "CollectionService wrapper for managing tagged instances under certain ancestor roots."
 
-version = "1.0.0"
+version = "1.0.1"
 license = "MIT"
 authors = ["Mario Chao"]
 realm = "shared"
