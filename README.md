@@ -1,4 +1,4 @@
-# ScopedCollection
+# Scoped Collection
 
 CollectionService wrapper for managing tagged instances under certain ancestor roots.
 
@@ -73,6 +73,8 @@ ScopedCollection.new(tagName: string, validAncestors: {Instance}): ScopedCollect
 
 This is similar to CollectionService's [`CreateCollection`](https://create.roblox.com/docs/reference/engine/classes/CollectionService#CreateCollection). Unlike `CreateCollection`, only instances under the [`DataModel`](https://create.roblox.com/docs/reference/engine/classes/DataModel) will be effective as a valid ancestor.
 
+---
+
 ### getLoaded
 
 Gets all tracked instances in the collection.
@@ -82,6 +84,8 @@ ScopedCollection:getLoaded(): {Instance}
 ```
 
 This is similar to CollectionService's [`GetTagged`](https://create.roblox.com/docs/reference/engine/classes/CollectionService#GetTagged).
+
+---
 
 ### setFunction_onLoaded
 
@@ -100,6 +104,8 @@ ScopedCollection:setFunction_onLoaded(
 
 This is similar to CollectionService's [`GetInstanceAddedSignal`](https://create.roblox.com/docs/reference/engine/classes/CollectionService#GetInstanceAddedSignal) and [Collection](https://create.roblox.com/docs/reference/engine/datatypes/Collection)'s `OnAdded`.
 
+---
+
 ### setFunction_onUnloaded
 
 Sets the callback function that fires when an instance leaves the collection.
@@ -117,6 +123,8 @@ ScopedCollection:setFunction_onUnloaded(
 
 This is similar to CollectionService's [`GetInstanceRemovedSignal`](https://create.roblox.com/docs/reference/engine/classes/CollectionService#GetInstanceRemovedSignal) and [Collection](https://create.roblox.com/docs/reference/engine/datatypes/Collection)'s `OnRemoved`.
 
+---
+
 ### start
 
 Starts the tracking process.
@@ -127,6 +135,8 @@ ScopedCollection:start(): ()
 
 This calls the function passed to [`setFunction_onLoaded`](#setfunction_onloaded) on current and future tracked instances.
 
+---
+
 ### terminate
 
 Stops the tracking process, unloading all instances.
@@ -136,6 +146,8 @@ ScopedCollection:terminate(): ()
 ```
 
 This calls the function passed to [`setFunction_onUnloaded`](#setfunction_onunloaded) on currently tracked instances, similar to Collection's [`Destroy()`](https://create.roblox.com/docs/reference/engine/datatypes/Collection#Destroy).
+
+---
 
 ## Credits
 
